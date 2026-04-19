@@ -3,178 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Préstamos - Sistema Local</title>
+    <title>Panel de Control de Préstamos - Culiacán</title>
     <style>
         :root {
-            --azul-encabezado: #cfe2f3;
-            --verde-exito: #d9ead3;
-            --amarillo-resaltado: #fff2cc;
-            --gris-borde: #cccccc;
+            --azul: #cfe2f3; --verde: #d9ead3; --amarillo: #fff2cc; 
+            --morado: #b4a7d6; --gris: #f4f4f9; --borde: #cccccc;
         }
-
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--gris); margin: 20px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        h2 { color: #333; text-align: center; border-bottom: 2px solid var(--azul-encabezado); padding-bottom: 10px; }
-
-        /* Estilo Tablas */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
-        th, td { border: 1px solid var(--gris-borde); padding: 10px; text-align: left; }
-        th { background-color: var(--azul-encabezado); font-weight: bold; }
-
-        .form-section { background: #fafafa; padding: 15px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 30px; }
-        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        h1 { text-align: center; color: #333; border-bottom: 3px solid var(--azul); padding-bottom: 10px; }
         
-        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .grid-layout { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
         
-        button { background-color: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #357abd; }
+        /* Formularios */
+        .card-form { background: #fff; border: 1px solid var(--borde); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Lista de Clientes */
+        .client-list { list-style: none; padding: 0; }
+        .client-item { 
+            padding: 12px; border: 1px solid #eee; margin-bottom: 8px; border-radius: 6px; 
+            cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center;
+        }
+        .client-item:hover { background-color: var(--azul); }
+        .client-item.active { border-left: 5px solid #4a90e2; background-color: #f0f7ff; }
 
-        .monto-liquidar { background-color: var(--amarillo-resaltado); font-weight: bold; text-align: center; }
-        .status-activo { background-color: var(--verde-exito); font-weight: bold; text-align: center; color: #274e13; }
-        
-        .total-row { background-color: var(--verde-exito); font-weight: bold; }
-        .card { border: 2px solid #4a90e2; padding: 15px; margin-top: 20px; border-radius: 8px; }
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { border: 1px solid var(--borde); padding: 10px; text-align: center; }
+        th { background-color: var(--azul); }
+
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: #4caf50; color: white; width: 100%; }
+        .btn-delete { background: #ff5252; color: white; padding: 5px 10px; font-size: 0.8em; }
+
+        .monto-highlight { background: var(--amarillo); font-weight: bold; font-size: 1.2em; }
+        .pagado { background-color: var(--verde) !important; color: #274e13; font-weight: bold; }
+        .badge-status { padding: 5px 10px; border-radius: 4px; background: var(--verde); color: #274e13; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Sistema de Gestión de Préstamos</h2>
+    <h1>Control Maestro de Préstamos</h1>
 
-    <div class="form-section">
-        <h3>Registrar Nuevo Préstamo</h3>
-        <div class="form-group">
-            <div>
-                <label>Cliente:</label>
-                <input type="text" id="cliente" placeholder="Nombre completo">
+    <div class="grid-layout">
+        <aside>
+            <div class="card-form">
+                <h3>Nuevo Préstamo</h3>
+                <div class="form-group">
+                    <label>Nombre del Cliente</label>
+                    <input type="text" id="nombre" placeholder="Luis Armando...">
+                </div>
+                <div class="form-group">
+                    <label>Monto Principal ($)</label>
+                    <input type="number" id="monto" placeholder="10000" oninput="sugerirInteres()">
+                </div>
+                <div class="form-group">
+                    <label>Interés Mensual ($)</label>
+                    <input type="number" id="interes" placeholder="1500">
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Inicio</label>
+                    <input type="date" id="fecha">
+                </div>
+                <button class="btn btn-add" onclick="guardarPrestamo()">+ Registrar Cliente</button>
             </div>
-            <div>
-                <label>Monto del Préstamo:</label>
-                <input type="number" id="monto" placeholder="Ej. 10000" oninput="calcularInteres()">
-            </div>
-            <div>
-                <label>Interés Mensual ($):</label>
-                <input type="number" id="interes" placeholder="Ej. 1500">
-            </div>
-            <div>
-                <label>Fecha de Inicio:</label>
-                <input type="date" id="fecha_inicio">
-            </div>
-        </div>
-        <br>
-        <button onclick="generarPrestamo()">Generar Tabla de Control</button>
-    </div>
 
-    <div id="vista-prestamo" style="display:none;">
-        <table>
-            <thead>
+            <h3>Clientes Activos</h3>
+            <ul id="listaClientes" class="client-list"></ul>
+        </aside>
+
+        <main id="detallePrestamo" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h2 id="view-nombre">Nombre del Cliente</h2>
+                    <p>Fecha de inicio: <span id="view-fecha"></span></p>
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge-status">ESTATUS: ACTIVO</span>
+                    <button class="btn btn-delete" onclick="eliminarPrestamoActual()" style="margin-top: 10px;">Eliminar Préstamo</button>
+                </div>
+            </div>
+
+            <table>
                 <tr>
-                    <th>N. Prestamo</th>
-                    <th>Fecha de prestamo</th>
-                    <th>Cliente</th>
-                    <th>Monto</th>
-                    <th>Interes</th>
+                    <th>Monto del Préstamo</th>
+                    <th>Interés Pactado</th>
+                    <th class="monto-highlight">Monto a Liquidar</th>
                 </tr>
-            </thead>
-            <tbody>
                 <tr>
-                    <td>1</td>
-                    <td id="res-fecha"></td>
-                    <td id="res-cliente"></td>
-                    <td id="res-monto"></td>
-                    <td id="res-interes"></td>
+                    <td id="view-monto"></td>
+                    <td id="view-interes"></td>
+                    <td id="view-liquidar" class="monto-highlight"></td>
                 </tr>
-            </tbody>
-        </table>
+            </table>
 
-        <div style="display: flex; gap: 20px;">
-            <table style="flex: 2;">
+            <h3>Historial de Pagos de Intereses</h3>
+            <table>
                 <thead>
                     <tr>
-                        <th>Fecha de Pago de Interés</th>
-                        <th>Monto de Interés</th>
-                        <th>Comprobante de pago</th>
+                        <th>Fecha de Pago</th>
+                        <th>Monto Interés</th>
+                        <th>Acción / Estado</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-pagos-body">
-                    </tbody>
+                <tbody id="tablaPagos"></tbody>
                 <tfoot>
-                    <tr class="total-row">
-                        <td>TOTAL ACUMULADO</td>
-                        <td id="total-intereses"></td>
-                        <td></td>
+                    <tr style="background: var(--verde); font-weight: bold;">
+                        <td>TOTAL INTERESES PAGADOS</td>
+                        <td id="totalPagado" colspan="2" style="font-size: 1.1em; color: #274e13;">$0.00</td>
                     </tr>
                 </tfoot>
             </table>
-
-            <div style="flex: 1;">
-                <table>
-                    <tr><th class="monto-liquidar">Monto a Liquidar</th></tr>
-                    <tr><td id="res-liquidar" style="text-align:center; font-size: 1.2em; font-weight:bold;"></td></tr>
-                </table>
-                <table>
-                    <tr><th style="background:#b4a7d6; color:white; text-align:center;">Estatus</th></tr>
-                    <tr><td class="status-activo">ACTIVO</td></tr>
-                </table>
-            </div>
-        </div>
-        <button onclick="window.print()" style="background:#666;">Imprimir Reporte PDF</button>
+        </main>
     </div>
 </div>
 
 <script>
-    function calcularInteres() {
-        const monto = document.getElementById('monto').value;
-        // Sugerencia automática del 15% según tu ejemplo
-        if(monto) {
-            document.getElementById('interes').value = (monto * 0.15).toFixed(2);
-        }
+    let prestamos = JSON.parse(localStorage.getItem('prestamos')) || [];
+    let indiceActual = null;
+
+    function sugerirInteres() {
+        const m = document.getElementById('monto').value;
+        if(m) document.getElementById('interes').value = (m * 0.15);
     }
 
-    function generarPrestamo() {
-        const cliente = document.getElementById('cliente').value;
+    function guardarPrestamo() {
+        const nombre = document.getElementById('nombre').value;
         const monto = parseFloat(document.getElementById('monto').value);
         const interes = parseFloat(document.getElementById('interes').value);
-        const fecha = document.getElementById('fecha_inicio').value;
+        const fecha = document.getElementById('fecha').value;
 
-        if(!cliente || !monto || !interes || !fecha) {
-            alert("Por favor completa todos los campos");
-            return;
-        }
+        if(!nombre || !monto || !fecha) return alert("Completa los datos");
 
-        // Llenar Ficha Principal
-        document.getElementById('res-cliente').innerText = cliente;
-        document.getElementById('res-monto').innerText = "$" + monto.toLocaleString('es-MX');
-        document.getElementById('res-interes').innerText = "$" + interes.toLocaleString('es-MX');
-        document.getElementById('res-fecha').innerText = fecha;
-        document.getElementById('res-liquidar').innerText = "$" + (monto + interes).toLocaleString('es-MX');
+        const nuevo = {
+            nombre, monto, interes, fecha,
+            pagos: [] // Aquí guardaremos los índices de los meses pagados
+        };
 
-        // Generar Tabla de Pagos (12 meses)
-        const tbody = document.getElementById('tabla-pagos-body');
-        tbody.innerHTML = "";
-        let fechaBase = new Date(fecha);
-        let sumaIntereses = 0;
-
-        for(let i = 1; i <= 12; i++) {
-            fechaBase.setMonth(fechaBase.getMonth() + 1);
-            // Ajuste para que sea el mismo día que pediste (ej. el 16)
-            const diaPago = fechaBase.getDate().toString().padStart(2, '0');
-            const mesPago = (fechaBase.getMonth() + 1).toString().padStart(2, '0');
-            const anioPago = fechaBase.getFullYear();
-            
-            const fila = `<tr>
-                <td>${diaPago}-${mesPago}-${anioPago}</td>
-                <td>$${interes.toLocaleString('es-MX')}</td>
-                <td><input type="checkbox"> Pagado</td>
-            </tr>`;
-            tbody.innerHTML += fila;
-            sumaIntereses += interes;
-        }
-
-        document.getElementById('total-intereses').innerText = "$" + sumaIntereses.toLocaleString('es-MX');
-        document.getElementById('vista-prestamo').style.display = "block";
+        prestamos.push(nuevo);
+        localStorage.setItem('prestamos', JSON.stringify(prestamos));
+        actualizarLista();
+        limpiarForm();
     }
+
+    function actualizarLista() {
+        const lista = document.getElementById('listaClientes');
+        lista.innerHTML = "";
+        prestamos.forEach((p, index) => {
+            const li = document.createElement('li');
+            li.className = `client-item ${indiceActual === index ? 'active' : ''}`;
+            li.innerHTML = `<span>${p.nombre}</span> <strong>$${p.monto}</strong>`;
+            li.onclick = () => mostrarDetalle(index);
+            lista.appendChild(li);
+        });
+    }
+
+    function mostrarDetalle(index) {
+        indiceActual = index;
+        const p = prestamos[index];
+        document.getElementById('detallePrestamo').style.display = "block";
+        document.getElementById('view-nombre').innerText = p.nombre;
+        document.getElementById('view-fecha').innerText = p.fecha;
+        document.getElementById('view-monto').innerText = "$" + p.monto.toLocaleString();
+        document.getElementById('view-interes').innerText = "$" + p.interes.toLocaleString();
+        document.getElementById('view-liquidar').innerText = "$" + (p.monto + p.interes).toLocaleString();
+
+        renderizarPagos(p);
+        actualizarLista();
+    }
+
+    function renderizarPagos(p) {
+        const tbody = document.getElementById('tablaPagos');
+        tbody.innerHTML = "";
+        let totalAcumulado = 0;
+        
+        let fechaBase = new Date(p.fecha);
+        fechaBase.setDate(fechaBase.getDate() + 1); // Ajuste de zona horaria
+
+        // Generamos 24 meses (historial y futuro)
+        for(let i = 1; i <= 24; i++) {
+            let fechaPago = new Date(fechaBase);
+            fechaPago.setMonth(fechaPago.getMonth() + i);
+            
+            const fechaStr = fechaPago.toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit', year: 'numeric'});
+            const isPagado = p.pagos.includes(i);
+            
+            if(isPagado) totalAcumulado += p.interes;
+
+            const tr = document.createElement('tr');
+            if(isPagado) tr.className = "pagado";
+
+            tr.innerHTML = `
+                <td>${fechaStr}</td>
+                <td>$${p.interes.toLocaleString()}</td>
+                <td>
+                    <button class="btn" style="background:${isPagado ? '#666':'#4a90e2'}; color:white;" 
+                        onclick="togglePago(${i})">
+                        ${isPagado ? 'Anular Pago' : 'Marcar como Pagado'}
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+        document.getElementById('totalPagado').innerText = "Acumulado: $" + totalAcumulado.toLocaleString();
+    }
+
+    function togglePago(mesIndice) {
+        const p = prestamos[indiceActual];
+        const posicion = p.pagos.indexOf(mesIndice);
+        
+        if(posicion > -1) {
+            p.pagos.splice(posicion, 1); // Quitar pago
+        } else {
+            p.pagos.push(mesIndice); // Agregar pago
+        }
+        
+        localStorage.setItem('prestamos', JSON.stringify(prestamos));
+        renderizarPagos(p);
+    }
+
+    function eliminarPrestamoActual() {
+        if(confirm("¿Seguro que quieres borrar a este cliente?")) {
+            prestamos.splice(indiceActual, 1);
+            localStorage.setItem('prestamos', JSON.stringify(prestamos));
+            indiceActual = null;
+            document.getElementById('detallePrestamo').style.display = "none";
+            actualizarLista();
+        }
+    }
+
+    function limpiarForm() {
+        document.getElementById('nombre').value = "";
+        document.getElementById('monto').value = "";
+        document.getElementById('interes').value = "";
+        document.getElementById('fecha').value = "";
+    }
+
+    actualizarLista();
 </script>
 
 </body>
